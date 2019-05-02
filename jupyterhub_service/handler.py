@@ -1,8 +1,12 @@
 from jupyterhub.handlers import BaseHandler as JupyterHubBaseHandler
 from jupyterhub.services.auth import HubAuthenticated
+from jupyterhub.utils import url_path_join
 
 class ServiceHandler(HubAuthenticated, JupyterHubBaseHandler):
-
+    """
+    Simple Service Handler that handles the boilerplate code
+    for authenticating your service JupyterHub.
+    """
     @property
     def hub_auth(self):
         return self.settings.get('hub_auth')

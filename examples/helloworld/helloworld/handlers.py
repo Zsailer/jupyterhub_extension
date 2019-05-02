@@ -8,5 +8,5 @@ class HelloWorldHandler(ServiceHandler):
 
 
 handlers = [
-    ('/hello', HelloWorldHandler)
+    ('/test', HelloWorldHandler)
 ]

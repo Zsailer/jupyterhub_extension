@@ -1,2 +1,2 @@
-from .application import ExtensionApp
-from .handler import ExtensionHandler
+from .application import ServiceApp
+from .handler import ServiceHandler

@@ -1,4 +1,4 @@
-# JupyterHub Extension
+# JupyterHub Service
 
 The easy way to write a JupyterHub Extension. 
 
@@ -6,7 +6,7 @@ The easy way to write a JupyterHub Extension.
 
 ## The purpose
 
-[JupyterHub Services]() allow you to integrate a custom service with JupyterHub. **JupyterHub-Extension** handles the boilerplate code for you. You can easily tranform your service into a Hub-authenticated, configurable service.
+[JupyterHub Services]() allow you to integrate a custom service with JupyterHub. **JupyterHub-Service** handles the boilerplate code for you. You can easily tranform your service into a Hub-authenticated, configurable service.
 
 
 ## How to use. 

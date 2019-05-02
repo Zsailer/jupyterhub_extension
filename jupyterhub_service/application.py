@@ -1,14 +1,22 @@
+import os
 import logging
 from urllib.parse import urlparse
 
-from jupyter_core.application import JupyterApp
+from tornado import web
+from tornado.httpserver import HTTPServer
+from tornado.ioloop import IOLoop
 
-from jupyterhub.log import CoroutineLogFormatter
+from jupyter_core.application import JupyterApp
+from jupyterhub.services.auth import HubAuth
+from jupyterhub.log import CoroutineLogFormatter, log_request
 from jupyterhub.utils import url_path_join
 
 from traitlets import (
+    default,
     Unicode,
-    Integer
+    Integer,
+    List,
+    Dict
 )
 
 ROOT = os.path.dirname(__file__)
@@ -37,9 +45,13 @@ class ServiceApp(JupyterApp):
 
     description = Unicode(__doc__)
 
-    base_url = UnicodeFromEnv('/services/hubshare/').tag(
+    base_url = UnicodeFromEnv('').tag(
         env='JUPYTERHUB_SERVICE_PREFIX',
         config=True)
+
+    # @default
+    # def _default_base_url(self):
+    #     return 
 
     hub_api_url = UnicodeFromEnv('http://127.0.0.1:8081/hub/api/').tag(
         env='JUPYTERHUB_API_URL',
@@ -122,7 +134,11 @@ class ServiceApp(JupyterApp):
         logger.parent = self.log
         logger.setLevel(self.log.level)
 
-    def init_settings(self):
+    def init_hub_auth(self):
+        """Initialize hub authentication"""
+        self.hub_auth = HubAuth()
+
+    def init_tornado_settings(self):
         """Initialize tornado config."""
         settings = dict(
             log_function=log_request,
@@ -136,7 +152,7 @@ class ServiceApp(JupyterApp):
             static_path=STATIC_FILES_DIR,
             static_url_prefix=url_path_join(self.base_url, 'static/'),
             template_path=self.template_paths,
-            jinja2_env=jinja_env,
+            #jinja2_env=jinja_env,
             xsrf_cookies=True,
         )
         
@@ -158,11 +174,21 @@ class ServiceApp(JupyterApp):
     def init_handlers(self):
         self._handlers = []
         for endpoint, handler in self.handlers:
-            url = url_path_join(self.base_url, self.name, endpoint)
+            url = url_path_join('services', self.base_url, self.name, endpoint)
+            print(url)
             self._handlers.append((url, handler))
 
     def init_tornado_application(self):
         self.tornado_application = web.Application(self._handlers, **self.tornado_settings)
+
+    def initialize(self, *args, **kwargs):
+        super().initialize(*args, **kwargs)
+        if self.generate_config or self.subapp:
+            return
+        self.init_hub_auth()
+        self.init_tornado_settings()
+        self.init_handlers()
+        self.init_tornado_application()
 
     def start(self):
         if self.subapp:
